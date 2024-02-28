@@ -2,9 +2,9 @@
 ```
 npm init -y
 ```
-## solc ^0.4.17
+## solc ^0.8.9
 ```
-npm install solc@0.4.17
+npm install solc@0.8.9
 ```
 ## mocha
 ```
