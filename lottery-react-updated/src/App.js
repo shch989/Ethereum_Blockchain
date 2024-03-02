@@ -1,25 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import web3 from './web3'
 import lottery from './lottery'
 
-const App = () => {
+function App() {
   const [manager, setManager] = useState('')
   const [players, setPlayers] = useState([])
   const [balance, setBalance] = useState('')
   const [value, setValue] = useState('')
   const [message, setMessage] = useState('')
 
-  const fetchData = async () => {
-    const manager = await lottery.methods.manager().call()
-    const players = await lottery.methods.getPlayers().call()
-    const balance = await web3.eth.getBalance(lottery.options.address)
+  useEffect(() => {
+    async function fetchData() {
+      const manager = await lottery.methods.manager().call()
+      const players = await lottery.methods.getPlayers().call()
+      const balance = await web3.eth.getBalance(lottery.options.address)
 
-    setManager(manager)
-    setPlayers(players)
-    setBalance(balance)
-  }
+      setManager(manager)
+      setPlayers(players)
+      setBalance(balance)
+    }
 
-  const onSubmit = async (event) => {
+    fetchData()
+  }, [])
+
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const accounts = await web3.eth.getAccounts()
@@ -34,31 +38,28 @@ const App = () => {
     setMessage('You have been entered!')
   }
 
-  const onClick = async () => {
+  async function handleClick() {
     const accounts = await web3.eth.getAccounts()
 
     setMessage('Waiting on transaction success...')
 
     await lottery.methods.pickWinner().send({
-      from: accounts[0]
+      from: accounts[0],
     })
 
     setMessage('A winner has been picked!')
   }
 
-  fetchData()
-
   return (
-    <div onSubmit={onSubmit}>
+    <div>
       <h2>Lottery Contract</h2>
       <p>
-        This contract is managed by {manager}.<br />
-        There are currently {players.length} people entered,
-        <br />
-        competing to win {web3.utils.fromWei(balance, 'ether')} ether!
+        This contract is managed by {manager}. There are currently{' '}
+        {players.length} people entered, competing to win{' '}
+        {web3.utils.fromWei(balance, 'ether')} ether!
       </p>
       <hr />
-      <form>
+      <form onSubmit={handleSubmit}>
         <h4>Want to try your luck?</h4>
         <div>
           <label>Amount of ether to enter</label>
@@ -71,7 +72,7 @@ const App = () => {
       </form>
       <hr />
       <h4>Ready to pick a winner?</h4>
-      <button onClick={onClick}>Pick a winner!</button>
+      <button onClick={handleClick}>Pick a winner!</button>
       <hr />
       <h1>{message}</h1>
     </div>
